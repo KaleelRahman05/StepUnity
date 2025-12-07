@@ -1,0 +1,201 @@
+<!-- student-dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dashboard - StepUnity</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="logo">StepUnity</div>
+    <div class="nav-links">
+      <a href="/student-dashboard.html">Dashboard</a>
+      <a href="/shop.html">Shop</a>
+      <a href="#" onclick="logout()">Logout</a>
+    </div>
+    <div class="hamburger" onclick="toggleMenu()">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </nav>
+
+  <main class="dashboard-container">
+    <h1>Student Dashboard</h1>
+    
+    <div class="dashboard-grid">
+      <!-- Profile Section -->
+      <section class="dashboard-card">
+        <h2>My Profile</h2>
+        <div id="profileInfo">
+          <div class="loader">Loading...</div>
+        </div>
+      </section>
+
+      <!-- Assigned Teacher -->
+      <section class="dashboard-card">
+        <h2>My Master</h2>
+        <div id="teacherInfo">
+          <div class="loader">Loading...</div>
+        </div>
+      </section>
+
+      <!-- Weekly Assignments -->
+      <section class="dashboard-card full-width">
+        <h2>Weekly Assignments</h2>
+        <div id="assignmentsContainer">
+          <div class="loader">Loading...</div>
+        </div>
+      </section>
+
+      <!-- Submit Assignment -->
+      <section class="dashboard-card">
+        <h2>Submit Video</h2>
+        <form id="submitAssignmentForm">
+          <select id="assignmentSelect" required>
+            <option value="">Select Assignment</option>
+          </select>
+          <input type="url" id="videoLink" placeholder="Video Link (YouTube, Drive, etc.)" required>
+          <button type="submit" class="btn-primary">Submit</button>
+        </form>
+      </section>
+
+      <!-- Leave Request -->
+      <section class="dashboard-card">
+        <h2>Request Leave</h2>
+        <form id="leaveRequestForm">
+          <input type="date" id="leaveDate" required>
+          <textarea id="leaveReason" placeholder="Reason for leave" rows="3" required></textarea>
+          <button type="submit" class="btn-primary">Submit Request</button>
+        </form>
+        <div id="leaveStatus" class="mt-3"></div>
+      </section>
+    </div>
+  </main>
+
+  <script src="/js/main.js"></script>
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = '/login.html';
+    }
+
+    async function loadDashboard() {
+      try {
+        const response = await fetch('/api/student/dashboard', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const result = await response.json();
+
+        if (result.success) {
+          // Load profile
+          document.getElementById('profileInfo').innerHTML = `
+            <p><strong>Name:</strong> ${result.data.student.name}</p>
+            <p><strong>Roll No:</strong> ${result.data.student.rollNumber}</p>
+            <p><strong>Department:</strong> ${result.data.student.department}</p>
+            <p><strong>Interested Style:</strong> ${result.data.student.interestedStyle}</p>
+            <p><strong>Membership:</strong> ${result.data.student.membershipStatus ? 'Active ✓' : 'Inactive'}</p>
+          `;
+
+          // Load teacher info
+          if (result.data.teacher) {
+            document.getElementById('teacherInfo').innerHTML = `
+              <p><strong>Name:</strong> ${result.data.teacher.name}</p>
+              <p><strong>Specialization:</strong> ${result.data.teacher.styleSpecialization}</p>
+              <p><strong>Bio:</strong> ${result.data.teacher.bio || 'N/A'}</p>
+            `;
+          } else {
+            document.getElementById('teacherInfo').innerHTML = '<p>No teacher assigned yet</p>';
+          }
+
+          // Load assignments
+          const assignmentsHTML = result.data.assignments.map(assignment => `
+            <div class="assignment-item">
+              <h4>${assignment.title}</h4>
+              <p>${assignment.description}</p>
+              <p><strong>Due:</strong> ${new Date(assignment.dueDate).toLocaleDateString()}</p>
+              <p><strong>Style:</strong> ${assignment.styleCategory}</p>
+            </div>
+          `).join('');
+          document.getElementById('assignmentsContainer').innerHTML = assignmentsHTML || '<p>No assignments yet</p>';
+
+          // Populate assignment select
+          const select = document.getElementById('assignmentSelect');
+          result.data.assignments.forEach(assignment => {
+            const option = document.createElement('option');
+            option.value = assignment._id;
+            option.textContent = assignment.title;
+            select.appendChild(option);
+          });
+        }
+      } catch (error) {
+        console.error('Error loading dashboard:', error);
+      }
+    }
+
+    document.getElementById('submitAssignmentForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const assignmentId = document.getElementById('assignmentSelect').value;
+      const videoLink = document.getElementById('videoLink').value;
+
+      try {
+        const response = await fetch('/api/student/assignments/submit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ assignmentId, videoLink })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          alert('Assignment submitted successfully!');
+          document.getElementById('submitAssignmentForm').reset();
+        } else {
+          alert('Error: ' + result.message);
+        }
+      } catch (error) {
+        alert('Error submitting assignment');
+      }
+    });
+
+    document.getElementById('leaveRequestForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const date = document.getElementById('leaveDate').value;
+      const reason = document.getElementById('leaveReason').value;
+
+      try {
+        const response = await fetch('/api/student/leave', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ date, reason })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          alert('Leave request submitted!');
+          document.getElementById('leaveRequestForm').reset();
+        } else {
+          alert('Error: ' + result.message);
+        }
+      } catch (error) {
+        alert('Error submitting leave request');
+      }
+    });
+
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('userRole');
+      window.location.href = '/login.html';
+    }
+
+    loadDashboard();
+  </script>
+</body>
+</html>

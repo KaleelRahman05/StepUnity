@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - StepUnity</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body style="background-color: black; color: #1bfd9c; font-family: Arial, sans-serif;">
+    
+    <div style="text-align: center; padding: 50px 20px;">
+        <h1 style="color: #1bfd9c; margin-bottom: 30px;">Welcome to StepUnity</h1>
+        
+        <div style="max-width: 500px; margin: 0 auto; background: #2a2a2a; padding: 40px; border: 2px solid #1bfd9c; border-radius: 10px;">
+            <h2 style="color: #1bfd9c; margin-bottom: 30px;">Create Your Account</h2>
+            
+            <form id="signup-form">
+                <input type="text" placeholder="Full Name" 
+                       style="width: 100%; padding: 15px; margin: 10px 0; border: 2px solid #1bfd9c; background: black; color: white; border-radius: 5px;" required>
+                
+                <input type="email" placeholder="kaleel@gmail.com" 
+                       style="width: 100%; padding: 15px; margin: 10px 0; border: 2px solid #1bfd9c; background: black; color: white; border-radius: 5px;" required>
+                
+                <input type="password" placeholder="Password" 
+                       style="width: 100%; padding: 15px; margin: 10px 0; border: 2px solid #1bfd9c; background: black; color: white; border-radius: 5px;" required>
+                
+                <input type="text" placeholder="Roll Number" 
+                       style="width: 100%; padding: 15px; margin: 10px 0; border: 2px solid #1bfd9c; background: black; color: white; border-radius: 5px;" required>
+                
+                  <input type="text" placeholder="Department" 
+                       style="width: 100%; padding: 15px; margin: 10px 0; border: 2px solid #1bfd9c; background: black; color: white; border-radius: 5px;" required>
+                
+                <select style="width: 100%; padding: 15px; margin: 10px 0; border: 2px solid #1bfd9c; background: black; color: white; border-radius: 5px;" required>
+                    <option value="">Select Dance Style</option>
+                    <option value="Folk">Folk</option>
+                    <option value="Classic">Classic</option>
+                    <option value="Hip-hop">Hip-hop</option>
+                </select>
+                
+                <p style="color: #1bfd9c; margin: 20px 0; font-size: 14px;">
+                    Are you a Master? <a href="/teacher-signup.html" style="color: #fd9c1b;">Click here to register as a teacher</a>
+                </p>
+                
+                <button type="submit" id="signup-btn" 
+                        style="width: 100%; padding: 15px; margin: 20px 0; background: #1bfd9c; color: black; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer;">
+                    Sign Up
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Link your auth.js file -->
+    <script src="js/auth.js"></script>
+</body>
+</html>

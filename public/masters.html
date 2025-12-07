@@ -1,0 +1,118 @@
+<!-- masters.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Masters - StepUnity</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <!-- Replace navbar in masters.html and shop.html -->
+<nav class="navbar">
+  <div class="navbar-container">
+    <a href="/index.html" class="navbar-logo">StepUnity</a>
+    <button class="navbar-toggle" onclick="toggleMenu()">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </button>
+    <ul class="navbar-menu">
+      <li><a href="/index.html">Home</a></li>
+      <li><a href="/masters.html">Masters</a></li>
+      <li><a href="/shop.html">Shop</a></li>
+      <li><a href="/login.html">Login</a></li>
+    </ul>
+  </div>
+</nav>
+
+
+  <main class="content-container">
+    <h1 class="page-title">Our Masters</h1>
+    <p class="page-subtitle">Learn from the best in Folk, Classic, and Hip-hop</p>
+
+    <div id="mastersContainer" class="masters-grid">
+      <!-- Masters will be loaded dynamically -->
+      <div class="loader">Loading masters...</div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Contact Us</h3>
+        <p>Email: stepunity@college.edu</p>
+        <p>Phone: +91 98765 43210</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 StepUnity. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="/js/main.js"></script>
+  <script>
+    async function loadMasters() {
+      try {
+        // For now, using sample data. Replace with API call later
+        const sampleMasters = [
+          {
+            name: 'Priya Sharma',
+            styleSpecialization: 'Folk',
+            bio: 'National award winner in traditional folk dance forms with 10+ years of teaching experience.',
+            achievements: ['National Folk Dance Champion 2020', 'Trained 100+ students'],
+            socialLinks: { instagram: '#', youtube: '#' }
+          },
+          {
+            name: 'Rahul Verma',
+            styleSpecialization: 'Hip-hop',
+            bio: 'Professional hip-hop choreographer with international competition experience.',
+            achievements: ['International Hip-hop Battle Winner', 'Choreographed for music videos'],
+            socialLinks: { instagram: '#', youtube: '#' }
+          },
+          {
+            name: 'Ananya Krishnan',
+            styleSpecialization: 'Classic',
+            bio: 'Bharatanatyam expert with 15 years of classical training and performance.',
+            achievements: ['Arangetram completed', 'Performed at cultural festivals nationwide'],
+            socialLinks: { instagram: '#', youtube: '#' }
+          }
+        ];
+
+        const container = document.getElementById('mastersContainer');
+        container.innerHTML = '';
+
+        sampleMasters.forEach(master => {
+          const masterCard = document.createElement('div');
+          masterCard.className = 'master-card';
+          masterCard.innerHTML = `
+            <div class="master-header">
+              <div class="master-avatar">${master.name[0]}</div>
+              <h3>${master.name}</h3>
+              <span class="style-badge">${master.styleSpecialization}</span>
+            </div>
+            <p class="master-bio">${master.bio}</p>
+            <div class="achievements">
+              <h4>Achievements:</h4>
+              <ul>
+                ${master.achievements.map(ach => `<li>${ach}</li>`).join('')}
+              </ul>
+            </div>
+            <div class="social-links">
+              <a href="${master.socialLinks.instagram}" target="_blank">Instagram</a>
+              <a href="${master.socialLinks.youtube}" target="_blank">YouTube</a>
+            </div>
+          `;
+          container.appendChild(masterCard);
+        });
+      } catch (error) {
+        console.error('Error loading masters:', error);
+        document.getElementById('mastersContainer').innerHTML = 
+          '<p class="error">Error loading masters. Please try again later.</p>';
+      }
+    }
+
+    loadMasters();
+  </script>
+</body>
+</html>
