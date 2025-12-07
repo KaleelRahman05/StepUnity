@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken');
 // Register new user
 exports.register = async (req, res) => {
     try {
-        console.log('📥 Registration request received:', req.body);
+        console.log('Registration request received:', req.body);
         
         const { name, email, password, role, rollNumber, department, interestedStyle,
             styleSpecialization, bio, socialLinks } = req.body;
@@ -53,7 +53,7 @@ exports.register = async (req, res) => {
 
         const user = await User.create(createPayload);
         
-        console.log('✅ User created successfully:', user.email);
+        console.log('User created successfully:', user.email);
 
         // If the new user is a student, try to assign a teacher matching their interestedStyle
         if ((role || 'student') === 'student' && interestedStyle) {
@@ -65,7 +65,7 @@ exports.register = async (req, res) => {
             const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             const teachers = await User.find({ role: 'teacher', styleSpecialization: { $regex: `^${escapeRegex(style)}$`, $options: 'i' } });
 
-            console.log('🔎 Matching teachers found:', teachers.map(t => ({ email: t.email, spec: t.styleSpecialization })));
+            console.log('Matching teachers found:', teachers.map(t => ({ email: t.email, spec: t.styleSpecialization })));
 
                 if (teachers && teachers.length > 0) {
                     // Compute assigned student counts for each teacher and pick the teacher with the fewest students
@@ -82,9 +82,9 @@ exports.register = async (req, res) => {
                     user.assignedTeacher = chosen._id;
                     await user.save();
 
-                    console.log(`🎯 Assigned teacher ${chosen.email} to student ${user.email}`);
+                    console.log(`Assigned teacher ${chosen.email} to student ${user.email}`);
                 } else {
-                    console.log('ℹ️ No matching teacher found for style:', interestedStyle);
+                    console.log(' No matching teacher found for style:', interestedStyle);
                     // Fallback: if there are any teachers at all, assign the student to the teacher with fewest students
                     const anyTeachers = await User.find({ role: 'teacher' });
                     if (anyTeachers && anyTeachers.length > 0) {
@@ -96,13 +96,13 @@ exports.register = async (req, res) => {
                         const fallback = anyCounts[0].teacher;
                         user.assignedTeacher = fallback._id;
                         await user.save();
-                        console.log(`🔁 Fallback assigned teacher ${fallback.email} to student ${user.email}`);
+                        console.log(`Fallback assigned teacher ${fallback.email} to student ${user.email}`);
                     } else {
-                        console.log('ℹ️ No teachers available to assign');
+                        console.log('ℹNo teachers available to assign');
                     }
                 }
             } catch (assignErr) {
-                console.error('❌ Error assigning teacher:', assignErr);
+                console.error('Error assigning teacher:', assignErr);
             }
         }
         
@@ -126,7 +126,7 @@ exports.register = async (req, res) => {
         });
         
     } catch (error) {
-        console.error('❌ Registration error:', error);
+        console.error(' Registration error:', error);
         res.status(500).json({ 
             success: false,
             message: 'Server error. Please try again later.',

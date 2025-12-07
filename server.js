@@ -44,9 +44,6 @@ app.get('/api/health', (req, res) => {
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-    console.log('================================================');
-    console.log(`✅ StepUnity Server Running`);
-    console.log(`📍 URL: http://localhost:${PORT}`);
-    console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log('================================================');
+    console.log(` Running on port:${PORT}`);
+   
 });

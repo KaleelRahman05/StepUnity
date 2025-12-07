@@ -24,20 +24,20 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Validation
             if (!name || !email || !password || !rollNumber || !department || !interestedStyle) {
-                alert('❌ Please fill all fields');
+                alert(' Please fill all fields');
                 return;
             }
             
             // Email validation
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) {
-                alert('❌ Please enter a valid email address');
+                alert(' Please enter a valid email address');
                 return;
             }
             
             // Password validation
             if (password.length < 6) {
-                alert('❌ Password must be at least 6 characters long');
+                alert(' Password must be at least 6 characters long');
                 return;
             }
             
@@ -78,11 +78,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Redirect to student dashboard
                     window.location.href = '/student-dashboard.html';
                 } else {
-                    alert('❌ ' + (data.message || 'Registration failed. Please try again.'));
+                    alert(' ' + (data.message || 'Registration failed. Please try again.'));
                 }
             } catch (error) {
                 console.error('Registration error:', error);
-                alert('❌ Network error. Please check if server is running.');
+                alert('Network error. Please check if server is running.');
             } finally {
                 // Re-enable button
                 signupBtn.disabled = false;
@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const password = document.querySelector('input[type="password"]')?.value;
             
             if (!email || !password) {
-                alert('❌ Please enter email and password');
+                alert(' Please enter email and password');
                 return;
             }
             
@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('user', JSON.stringify(data.user));
                     
-                    alert('✅ Login successful!');
+                    alert(' Login successful!');
                     
                     // Redirect based on role
                     if (data.user.role === 'student') {
@@ -134,11 +134,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         window.location.href = '/teacher-dashboard.html';
                     }
                 } else {
-                    alert('❌ ' + (data.message || 'Login failed'));
+                    alert( (data.message || 'Login failed'));
                 }
             } catch (error) {
                 console.error('Login error:', error);
-                alert('❌ Network error. Please try again.');
+                alert('Network error. Please try again.');
             } finally {
                 loginBtn.disabled = false;
                 loginBtn.textContent = 'Login';
