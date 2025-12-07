@@ -181,6 +181,7 @@
         if (result.success) {
           alert('Leave request submitted!');
           document.getElementById('leaveRequestForm').reset();
+          loadMyLeaves();
         } else {
           alert('Error: ' + result.message);
         }
@@ -188,6 +189,84 @@
         alert('Error submitting leave request');
       }
     });
+
+    // Load student's leave requests and show statuses
+    async function loadMyLeaves() {
+      try {
+        const response = await fetch('/api/student/leave', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const result = await response.json();
+        if (result.success) {
+          // detect changes and optionally notify
+          const html = result.data.map(l => `
+            <div class="leave-item">
+              <p><strong>Date:</strong> ${new Date(l.date).toLocaleDateString()}</p>
+              <p><strong>Reason:</strong> ${l.reason}</p>
+              <p><strong>Status:</strong> <span class="status-${l.status}">${l.status}</span></p>
+              ${l.teacherResponse ? `<p><strong>Teacher Response:</strong> ${l.teacherResponse}</p>` : ''}
+              <hr>
+            </div>
+          `).join('');
+          document.getElementById('leaveStatus').innerHTML = html || '<p>No leave requests</p>';
+        }
+      } catch (err) {
+        console.error('Error loading leave requests:', err);
+      }
+    }
+
+    // Poll for leave updates every 12 seconds and show a browser notification when status changes
+    let lastLeavesSnapshot = null;
+    async function pollLeaves() {
+      try {
+        const response = await fetch('/api/student/leave', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const result = await response.json();
+        if (result.success) {
+          const leaves = result.data;
+          // Compare with last snapshot
+          if (lastLeavesSnapshot) {
+            const changed = leaves.find(l => {
+              const prev = lastLeavesSnapshot.find(p => p._id === l._id);
+              return prev && prev.status !== l.status;
+            });
+            if (changed) {
+              // request notification permission if needed
+              if (Notification && Notification.permission === 'granted') {
+                new Notification('Leave request updated', { body: `Your leave for ${new Date(changed.date).toLocaleDateString()} was ${changed.status}` });
+              } else if (Notification && Notification.permission !== 'denied') {
+                Notification.requestPermission().then(perm => {
+                  if (perm === 'granted') new Notification('Leave request updated', { body: `Your leave for ${new Date(changed.date).toLocaleDateString()} was ${changed.status}` });
+                });
+              } else {
+                // fallback alert
+                alert(`Your leave for ${new Date(changed.date).toLocaleDateString()} was ${changed.status}`);
+              }
+            }
+          }
+          lastLeavesSnapshot = leaves;
+          // update UI
+          const html = leaves.map(l => `
+            <div class="leave-item">
+              <p><strong>Date:</strong> ${new Date(l.date).toLocaleDateString()}</p>
+              <p><strong>Reason:</strong> ${l.reason}</p>
+              <p><strong>Status:</strong> <span class="status-${l.status}">${l.status}</span></p>
+              ${l.teacherResponse ? `<p><strong>Teacher Response:</strong> ${l.teacherResponse}</p>` : ''}
+              <hr>
+            </div>
+          `).join('');
+          document.getElementById('leaveStatus').innerHTML = html || '<p>No leave requests</p>';
+        }
+      } catch (err) {
+        console.error('Error polling leave requests:', err);
+      }
+    }
+
+    // start polling
+    setInterval(pollLeaves, 12000);
+    // initial load
+    pollLeaves();
 
     function logout() {
       localStorage.removeItem('token');

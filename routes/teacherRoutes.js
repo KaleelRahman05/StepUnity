@@ -16,6 +16,7 @@ router.use(protect);
 router.use(authorize('teacher'));
 
 router.get('/students', getStudents);
+router.post('/assign-students', require('../controllers/teacherController').bulkAssignStudents);
 router.post('/assignments', createAssignment);
 router.get('/assignments', getMyAssignments);
 router.post('/assignments/review', reviewSubmission);

@@ -23,6 +23,10 @@
       <!-- My Students -->
       <section class="dashboard-card full-width">
         <h2>My Students</h2>
+        <div style="display:flex; gap:10px; align-items:center; margin-bottom:12px;">
+          <button id="assignMatchingBtn" class="btn-primary">Add Matching Students</button>
+          <small style="color:#888">Assign unassigned students who match your specialization</small>
+        </div>
         <div id="studentsContainer">
           <div class="loader">Loading...</div>
         </div>
@@ -92,6 +96,44 @@
         console.error('Error loading students:', error);
       }
     }
+
+    document.getElementById('assignMatchingBtn').addEventListener('click', async () => {
+      if (!confirm('Assign all currently unassigned students who match your specialization to you?')) return;
+
+      // Use explicit backend origin in development to avoid origin mismatch
+      const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+      const apiBase = isLocal ? 'http://localhost:5000' : '';
+
+      try {
+        const response = await fetch(apiBase + '/api/teacher/assign-students', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+        });
+
+        console.log('Assign students response status:', response.status, 'content-type:', response.headers.get('content-type'));
+
+        // Try to parse JSON, but fall back to text for HTML/error pages
+        let result;
+        const text = await response.text();
+        try {
+          result = JSON.parse(text);
+        } catch (parseErr) {
+          console.error('Failed to parse JSON from response. Raw response:', text);
+          alert('Server returned unexpected response:\n' + text.slice(0, 1000));
+          return;
+        }
+
+        if (result.success) {
+          alert(result.message || `Assigned ${result.assignedCount || 0} students`);
+          loadStudents();
+        } else {
+          alert('Error: ' + (result.message || 'Could not assign students'));
+        }
+      } catch (err) {
+        console.error('Error assigning students:', err);
+        alert('Network error while assigning students (see console)');
+      }
+    });
 
     async function loadLeaveRequests() {
       try {

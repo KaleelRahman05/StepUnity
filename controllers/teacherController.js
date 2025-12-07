@@ -148,13 +148,83 @@ exports.updateLeaveRequest = async (req, res) => {
     leaveRequest.status = status;
     leaveRequest.teacherResponse = teacherResponse;
     await leaveRequest.save();
-    
+    // Populate student info for client convenience
+    const populated = await LeaveRequest.findById(leaveRequest._id).populate('student', 'name rollNumber');
+
     res.json({
       success: true,
       message: `Leave request ${status}`,
-      data: leaveRequest
+      data: populated
     });
   } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Bulk assign students who match the teacher's specialization
+exports.bulkAssignStudents = async (req, res) => {
+  try {
+    console.log('➡️ bulkAssignStudents called by user:', req.user && req.user.id);
+    const teacherId = req.user.id;
+
+    // Fetch teacher to read their specialization
+    const teacher = await User.findById(teacherId);
+    if (!teacher) return res.status(404).json({ success: false, message: 'Teacher not found' });
+    if (!teacher.styleSpecialization) return res.status(400).json({ success: false, message: 'Teacher has no specialization set' });
+
+    const style = String(teacher.styleSpecialization).trim();
+    const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+    // Find students with matching interestedStyle (case-insensitive) and not already assigned
+    const students = await User.find({
+      role: 'student',
+      $or: [ { assignedTeacher: { $exists: false } }, { assignedTeacher: null } ],
+      interestedStyle: { $regex: `^${escapeRegex(style)}$`, $options: 'i' }
+    });
+
+    if (!students || students.length === 0) {
+      // If there are no matching students, but there is exactly one unassigned student in the system,
+      // try to assign that single student to a teacher who specializes in the student's interestedStyle.
+      const unassignedCount = await User.countDocuments({ role: 'student', $or: [ { assignedTeacher: { $exists: false } }, { assignedTeacher: null } ] });
+      if (unassignedCount === 1) {
+        const single = await User.findOne({ role: 'student', $or: [ { assignedTeacher: { $exists: false } }, { assignedTeacher: null } ] });
+        if (single) {
+          const studentStyle = single.interestedStyle ? String(single.interestedStyle).trim() : '';
+          if (studentStyle) {
+            const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
+            const matchingTeachers = await User.find({ role: 'teacher', styleSpecialization: { $regex: `^${escapeRegex(studentStyle)}$`, $options: 'i' } });
+
+            if (matchingTeachers && matchingTeachers.length > 0) {
+              // choose teacher with fewest assigned students
+              const counts = await Promise.all(matchingTeachers.map(async (t) => {
+                const cnt = await User.countDocuments({ assignedTeacher: t._id });
+                return { teacher: t, count: cnt };
+              }));
+              counts.sort((a, b) => a.count - b.count);
+              const chosen = counts[0].teacher;
+              single.assignedTeacher = chosen._id;
+              await single.save();
+              return res.json({ success: true, message: `Assigned single student to specialized teacher ${chosen.name || chosen.email}`, assignedCount: 1, data: [{ id: single._id, name: single.name, email: single.email, assignedTo: { id: chosen._id, name: chosen.name, email: chosen.email } }] });
+            }
+          }
+
+          // No specialized teacher found — fallback to assigning to requesting teacher
+          single.assignedTeacher = teacherId;
+          await single.save();
+          return res.json({ success: true, message: 'Assigned the single unassigned student to you (no specialized teacher found)', assignedCount: 1, data: [{ id: single._id, name: single.name, email: single.email }] });
+        }
+      }
+
+      return res.json({ success: true, message: 'No matching unassigned students found', assignedCount: 0, data: [] });
+    }
+
+    // Assign each student to this teacher
+    const bulkOps = students.map(s => ({ updateOne: { filter: { _id: s._id }, update: { $set: { assignedTeacher: teacherId } } } }));
+    await User.bulkWrite(bulkOps);
+
+    return res.json({ success: true, message: `Assigned ${students.length} student(s) to you`, assignedCount: students.length, data: students.map(s => ({ id: s._id, name: s.name, email: s.email })) });
+  } catch (error) {
+    console.error('Error in bulkAssignStudents:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
