@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('user', JSON.stringify(data.user));
                     
-                    alert('✅ Registration successful! Welcome to StepUnity!');
+                    alert('Registration successful! Welcome to StepUnity!');
                     
                     // Redirect to student dashboard
                     window.location.href = '/student-dashboard.html';

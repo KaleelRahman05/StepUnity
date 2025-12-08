@@ -98,7 +98,7 @@ exports.register = async (req, res) => {
                         await user.save();
                         console.log(`Fallback assigned teacher ${fallback.email} to student ${user.email}`);
                     } else {
-                        console.log('ℹNo teachers available to assign');
+                        console.log('No teachers available to assign');
                     }
                 }
             } catch (assignErr) {
