@@ -144,7 +144,7 @@ const productsData = [
     category: "Accessories",
     price: 299,
     discountedPrice: 199,
-    image: "https://images.unsplash.com/photo-1592609931095-54a2168ae893?w=400&q=80",
+    image: "https://assets.adidas.com/images/h_840,f_auto,q_auto,fl_lossy,c_fill,g_auto/d52613ae020a4714ae3aaf27009c2e92_9366/Essentials_Duffel_Bag_Blue_HR5353_01_standard.jpg",
     description: "Pack of 2 moisture-wicking wristbands",
     stock: 100
   },
