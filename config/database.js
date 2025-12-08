@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const connectDB = async () => {
     try {
         // Get MongoDB URI from environment variable or use default
-        const mongoURI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/stepunity';
+        const mongoURI = process.env.MONGODB_URI || 'mongodb+srv://Kaleel_20:Kaleel_123@clusterstepunity.cfjpik5.mongodb.net/?appName=ClusterStepUnity';
         
         
         // Connect without deprecated options
