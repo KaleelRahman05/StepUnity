@@ -28,6 +28,18 @@ exports.register = async (req, res) => {
                 message: 'User with this email already exists' 
             });
         }
+
+        // If attempting to register as a teacher, require a verification code
+        if (role === 'teacher' || (role === undefined && req.body.styleSpecialization)) {
+            const providedCode = req.body.verificationCode;
+            const expectedCode = process.env.TEACHER_CODE || 'STEPUNITY_MASTER_2025';
+            if (!providedCode || providedCode !== expectedCode) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Invalid teacher verification code'
+                });
+            }
+        }
         
         // Hash password
         const salt = await bcrypt.genSalt(12);
