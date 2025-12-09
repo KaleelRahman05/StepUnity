@@ -191,5 +191,4 @@ If you'd like, I can:
 
 ---
 
-This README aims to give a full working overview and the commands you asked for. Tell me which part you want me to expand or implement next.
 
