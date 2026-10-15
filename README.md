@@ -147,6 +147,13 @@ If authenticated and the user has `membershipStatus: true`, the response will in
 
 Security note: storing JWT in `localStorage` is simple but vulnerable to XSS. For production, consider storing tokens in HttpOnly cookies and protecting routes with CSRF mitigations.
 
+**MongoDB connection troubleshooting**
+
+- **Local MongoDB:** Verify that MongoDB Server is installed and running, and that `MONGODB_URI` points to the correct local instance.
+- **MongoDB Atlas:** Verify that the cluster is available, the connection string contains the correct hostname, and your network access settings allow your IP address.
+- **DNS errors:** If the error contains `ENOTFOUND` or `querySrv`, verify the Atlas hostname first. If it is correct, check your DNS and network connection.
+- **Credentials:** Keep database credentials in environment variables. Never commit your `.env` file or expose database passwords in the README.
+
 **Testing**
 - Unit/integration tests use Mocha and `mongodb-memory-server` under `test/`.
 - Run tests:
